@@ -8,12 +8,10 @@ const url = "mongodb://192.168.1.107/mydb";  //port는 따로 부여하지 않�
 //client생성
 const client = new MongoClient(url, { useUnifiedTopology: true });
 
-
 //문서 한 개 가져오기
 function testFindOne() {
     client.connect().then(client => {
         const db = client.db("mydb");
-
         db.collection("friends").findOne().then(result => {
             console.log(result);
         });
@@ -53,4 +51,56 @@ function testFind() {
         });
     });
 }
-testFind();
+//testFind();
+
+//조건절
+//= SQL) SELECT * FROM table WHERE column = ... ;
+
+function testFindByName(name) {
+    client.connect().then(client => {
+        const db = client.db("mydb");
+
+        db.collection("friends").find ({
+            name: name   //db키: 값
+        }).toArray().then(result => {
+            for (let i = 0; i < result.length; i++) {
+                console.log(result[i])
+            }
+        }).catch(err => {
+            console.error(err);
+        })
+    })
+}
+//testFindByName("고길동");
+
+//비교연산자: $gt, $gte, $lt, $lte, $ne
+//논리연산자: $and, $or, $not
+function testFindByCondition(projection, condition) {
+    client.connect().then(client => {
+        const db = client.db("mydb");
+
+        db.collection("friends").find(
+            condition, //첫번째 인자: 조건
+            projection
+        ).toArray().then(result => {
+            for (let i = 0; i <= result.length; i++) {
+                console.log(result[i]);
+            }
+        })
+    })
+};
+
+/*
+testFindByCondition({ name: 1, age: 1, species: 1},    //projection 객체: 1-표시, 0-표시x
+    {
+        $and: [
+            {age: {$gte: 20}},
+            {age: {$lte: 50}}  
+        ] //20세 이상 50세 이하
+
+        $or: [
+            {age: {$lt: 20}},
+            {age: {$gt: 50}}
+        ]
+    });
+*/
